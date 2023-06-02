@@ -1,12 +1,7 @@
 
-import logging
-
 from nslookup import Nslookup
 from ping3 import ping
 from config import *
-
-logging.basicConfig(level=logging.DEBUG, format='%(pathname)s(%(lineno)s): %(levelname)s %(message)s')
-log = logging.getLogger()
 
 
 def can_ping(host: str, timeout=2) -> bool:
