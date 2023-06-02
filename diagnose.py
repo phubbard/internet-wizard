@@ -34,7 +34,7 @@ def can_resolve(host: str) -> bool:
 
     dns_query = Nslookup()
     record = dns_query.dns_host_lookup(host, 'A')
-    if record.answer:
+    if len(record.answer) > 0:
         return True
     return False
 
@@ -43,9 +43,7 @@ def can_resolve_all(hosts: list) -> bool:
     """
     Forward A-record DNS lookup
     """
-
-    dns_query = Nslookup()
-    tf_list = [dns_query.dns_host_lookup(host, 'A') for host in hosts]
+    tf_list = [can_resolve(host) for host in hosts]
     return all(tf_list)
 
 
