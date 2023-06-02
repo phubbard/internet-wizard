@@ -3,6 +3,9 @@ from nslookup import Nslookup
 from ping3 import ping
 from config import *
 
+# Instantiate once for reuse
+dns_query = Nslookup()
+
 
 def can_ping(host: str, timeout=2) -> bool:
     """
@@ -17,6 +20,8 @@ def can_ping(host: str, timeout=2) -> bool:
 def can_ping_all(hosts: list, timeout=2) -> bool:
     """
     Ping all hosts in a list
+    TODO TQDM
+    TODO one-liner?
     """
     tf_list = [can_ping(host, timeout=timeout) for host in hosts]
     return all(tf_list)
@@ -26,8 +31,6 @@ def can_resolve(host: str) -> bool:
     """
     Forward A-record DNS lookup
     """
-
-    dns_query = Nslookup()
     record = dns_query.dns_host_lookup(host, 'A')
     if len(record.answer) > 0:
         return True
@@ -36,14 +39,15 @@ def can_resolve(host: str) -> bool:
 
 def can_resolve_all(hosts: list) -> bool:
     """
-    Forward A-record DNS lookup
+    Are all hosts resolvable?
+    TODO TQDM
+    TODO one-liner
     """
     tf_list = [can_resolve(host) for host in hosts]
     return all(tf_list)
 
 
 def local_network_up() -> bool:
-
     connected = can_ping_all(LOCAL_IPS)
     local_dns_ok = can_resolve_all(LOCAL_HOSTS)
     router_ok = can_ping(ROUTER)
