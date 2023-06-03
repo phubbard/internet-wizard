@@ -13,7 +13,7 @@ WIFI = 'wifi'
 ROUTER = 'fratboy'
 
 LOCAL_HOSTS = [
-    'www', MODEM, WIFI, ROUTER
+    'usul', MODEM, WIFI, ROUTER
 ]
 
 REMOTE_IPS = [
