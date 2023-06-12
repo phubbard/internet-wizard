@@ -85,5 +85,5 @@ def local_network_up() -> bool:
 
 
 if __name__ == '__main__':
-    # local_network_up()
-    can_lookup_domain('google.com', resolver=REMOTE_DNS_IP)
+    local_network_up()
+    # can_lookup_domain('google.com', resolver=REMOTE_DNS_IP)
