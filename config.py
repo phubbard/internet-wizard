@@ -22,6 +22,14 @@ REMOTE_IPS = [
     '1.1.1.1'
 ]
 
-REMOTE_HOSTS = [
+REMOTE_DOMAINS = [
     'google.com', 'cloudflare.com'
 ]
+
+REMOTE_HOSTS = [
+    'www.google.com', 'www.cloudflare.com'
+]
+
+LOCAL_DOMAIN = 'phfactor.net'
+LOCAL_DNS_IP = '204.128.136.5'
+REMOTE_DNS_IP = '8.8.8.8'

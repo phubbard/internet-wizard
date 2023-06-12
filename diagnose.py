@@ -1,16 +1,15 @@
 
-from nslookup import Nslookup
+# from nslookup import Nslookup
 from ping3 import ping
 from rich import pretty, print
 
 from config import *
+from dns import resolve, lookup_domain
 
 
 # TODO https://rich.readthedocs.io/en/latest/progress.html
 # TODO https://stackoverflow.com/questions/49320007/how-to-use-tqdm-to-iterate-over-a-list
 
-# Instantiate once for reuse
-dns_query = Nslookup()
 # See https://pypi.org/project/rich/
 pretty.install()
 
@@ -36,21 +35,32 @@ def can_ping_all(hosts: list, timeout=2) -> bool:
     return all(tf_list)
 
 
-def can_resolve(host: str) -> bool:
-    # Simplest-possible one-host to IPv4 lookup
-    print(f"Resolving {host}...", end='')
-    record = dns_query.dns_host_lookup(host, 'A')
-    if len(record.answer) > 0:
+def can_resolve_host(host: str, resolver=REMOTE_DNS_IP) -> bool:
+    # Try the Julia Evans code - only depends on stdlib
+    print(f"Resolving {host} with {resolver}...", end='')
+    try:
+        resolve(host, nameserver=resolver)
         print("[green]ok[/]")
         return True
-    print("[red]fail[/]")
-    return False
+    except:
+        print("[red]fail[/]")
+        return False
 
 
-def can_resolve_all(hosts: list) -> bool:
-    # Are all hosts resolvable?
-    tf_list = [can_resolve(host) for host in hosts]
+def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
+    tf_list = [can_resolve_host(host, resolver=resolver) for host in hosts]
     return all(tf_list)
+
+
+def can_lookup_domain(domain: str, resolver: str) -> bool:
+    print(f"Looking up {domain} with {resolver}...", end='')
+# try:
+    lookup_domain(domain)
+    print("[green]ok[/]")
+    return True
+    # except:
+    #     print("[red]fail[/]")
+    #     return False
 
 
 def colorize(tf: bool) -> str:
@@ -58,19 +68,22 @@ def colorize(tf: bool) -> str:
         return "[green]ok[/]"
     return "[red]fail[/]"
 
+
 def local_network_up() -> bool:
     local_network = colorize(can_ping_all(LOCAL_IPS))
-    local_dns = colorize(can_resolve_all(LOCAL_HOSTS))
+    local_dns = colorize(can_resolve_all_hosts(LOCAL_HOSTS, resolver=LOCAL_DNS_IP))
     router = colorize(can_ping(ROUTER))
     modem = colorize(can_ping(MODEM))
     wifi = colorize(can_ping(WIFI))
 
     remote_network = colorize(can_ping_all(REMOTE_IPS))
-    remote_dns = colorize(can_resolve_all(REMOTE_HOSTS))
+    remote_domains = colorize(all(can_lookup_domain(domain, resolver=REMOTE_DNS_IP) for domain in REMOTE_DOMAINS))
+    remote_hosts = colorize(can_resolve_all_hosts(REMOTE_HOSTS, resolver=REMOTE_DNS_IP))
 
-    print(f'{local_network=} {local_dns=} {router=} {modem=} {wifi=} {remote_network=} {remote_dns=}')
-    return local_network and local_dns and router and modem and wifi and remote_network and remote_dns
+    print(f'{local_network=} {local_dns=} {router=} {modem=} {wifi=} {remote_network=} {remote_domains=} {remote_hosts=}')
+    return local_network and local_dns and router and modem and wifi and remote_network and remote_domains and remote_hosts
 
 
 if __name__ == '__main__':
-    local_network_up()
+    # local_network_up()
+    can_lookup_domain('google.com', resolver=REMOTE_DNS_IP)
