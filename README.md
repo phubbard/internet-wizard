@@ -14,7 +14,7 @@ standard libraries and any Python-only packages. No C binaries, for example.
 
 Step one - use Python to automate the ping / dns tests
 
-In progress. The DNS library exceptions are a bit weird, but I think I can figure it out.
+I had to switch from the DNS library to Julia Evans' code from https://implement-dns.wizardzines.com/index.html
 
 Step two - refactor using a goal-seeking algorithm. For each step,
 it should print out success / failure, what it might mean and how to reset / resolve / fix / reboot.
