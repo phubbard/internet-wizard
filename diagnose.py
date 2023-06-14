@@ -54,13 +54,13 @@ def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
 
 def can_lookup_domain(domain: str, resolver: str) -> bool:
     print(f"Looking up {domain} with {resolver}...", end='')
-# try:
-    lookup_domain(domain)
-    print("[green]ok[/]")
-    return True
-    # except:
-    #     print("[red]fail[/]")
-    #     return False
+    try:
+        lookup_domain(domain)
+        print("[green]ok[/]")
+        return True
+    except:
+        print("[red]fail[/]")
+        return False
 
 
 def colorize(tf: bool) -> str:
