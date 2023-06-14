@@ -6,7 +6,7 @@ In this project I hope to automate that.
 
 # Constraints
 
-I want to run this from my iPad, using Pyto, Juno, a-Shell, Carnets or similar. This limits me to Python 3, it's 
+I want to run this from my iPad, using Pyto, Juno, a-Shell, Carnets or similar. This limits me to Python 3, its 
 standard libraries and any Python-only packages. No C binaries, for example.
 
 
