@@ -46,6 +46,7 @@ TYPE_A = 1
 CLASS_IN = 1
 TYPE_TXT = 16
 TYPE_NS = 2
+RECURSION_DESIRED = 1 << 8
 
 
 def header_to_bytes(header):
@@ -67,7 +68,6 @@ def encode_dns_name(domain_name):
 def build_query(domain_name, record_type):
     name = encode_dns_name(domain_name)
     id = random.randint(0, 65535)
-    RECURSION_DESIRED = 1 << 8
     header = DNSHeader(id=id, num_questions=1, flags=RECURSION_DESIRED)
     question = DNSQuestion(name=name, type_=record_type, class_=CLASS_IN)
     return header_to_bytes(header) + question_to_bytes(question)
@@ -118,23 +118,14 @@ def parse_dns_packet(data):
     answers = [parse_record(reader) for _ in range(header.num_answers)]
     authorities = [parse_record(reader) for _ in range(header.num_authorities)]
     additionals = [parse_record(reader) for _ in range(header.num_additionals)]
-
     return DNSPacket(header, questions, answers, authorities, additionals)
+
 
 def parse_question(reader):
     name = decode_name(reader)
     data = reader.read(4)
     type_, class_ = struct.unpack("!HH", data)
     return DNSQuestion(name, type_, class_)
-
-
-def lookup_domain(domain_name):
-    query = build_query(domain_name, TYPE_A)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(query, ('8.8.8.8', 53))
-    data, _ = sock.recvfrom(1024)
-    response = parse_dns_packet(data)
-    return ip_to_string(response.answers[0].data)
 
 
 def send_query(ip_address, domain_name, record_type):
@@ -165,13 +156,34 @@ def get_nameserver(packet):
 
 def resolve(domain_name, record_type=TYPE_A, nameserver='198.41.0.4'):
     while True:
+        # FIXME Recursion and rate limits
+        # FIXME Scope the exception
         # print(f'Querying {nameserver} for {domain_name}', end=' ')
         response = send_query(nameserver, domain_name, record_type)
         if ip := get_answer(response):
-            return ip
+            return ip_to_string(ip)
         elif nsIP := get_nameserver_ip(response):
             nameserver = nsIP
         elif ns_domain := get_nameserver(response):
             nameserver = resolve(ns_domain, TYPE_A, nameserver=nameserver)
         else:
             raise Exception('something went wrong')
+
+
+############################################################
+# Public API calls
+def lookup_domain(domain_name):
+    query = build_query(domain_name, TYPE_A)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(query, ('8.8.8.8', 53))
+    data, _ = sock.recvfrom(1024)
+    response = parse_dns_packet(data)
+    return ip_to_string(response.answers[0].data)
+
+
+def lookup_host(hostname:str, nameserver='8.8.8.8') -> str:
+    # Hardwired - non-recursive, A records only
+    response = send_query(nameserver, hostname, TYPE_A)
+    if ip := get_answer(response):
+        return ip_to_string(ip)
+

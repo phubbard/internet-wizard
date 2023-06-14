@@ -4,7 +4,7 @@ from ping3 import ping
 from rich import pretty, print
 
 from config import *
-from dns import resolve, lookup_domain
+from dns import lookup_domain, lookup_host
 
 
 # TODO https://rich.readthedocs.io/en/latest/progress.html
@@ -27,7 +27,7 @@ def can_ping(host: str, timeout=2) -> bool:
     return False
 
 
-def can_ping_all(hosts: list, timeout=2) -> bool:
+def can_ping_all(hosts: list, timeout=1) -> bool:
     """
     Ping all hosts in a list
     """
@@ -38,13 +38,12 @@ def can_ping_all(hosts: list, timeout=2) -> bool:
 def can_resolve_host(host: str, resolver=REMOTE_DNS_IP) -> bool:
     # Try the Julia Evans code - only depends on stdlib
     print(f"Resolving {host} with {resolver}...", end='')
-    try:
-        resolve(host, nameserver=resolver)
-        print("[green]ok[/]")
+    ip = lookup_host(host, nameserver=resolver)
+    if ip:
+        print("[green]ok {ip=}[/]")
         return True
-    except:
-        print("[red]fail[/]")
-        return False
+    print("[red]fail[/]")
+    return False
 
 
 def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
@@ -54,13 +53,13 @@ def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
 
 def can_lookup_domain(domain: str, resolver: str) -> bool:
     print(f"Looking up {domain} with {resolver}...", end='')
-# try:
-    lookup_domain(domain)
-    print("[green]ok[/]")
-    return True
-    # except:
-    #     print("[red]fail[/]")
-    #     return False
+    try:
+        lookup_domain(domain)
+        print("[green]ok[/]")
+        return True
+    except:
+        print("[red]fail[/]")
+        return False
 
 
 def colorize(tf: bool) -> str:
@@ -85,5 +84,7 @@ def local_network_up() -> bool:
 
 
 if __name__ == '__main__':
-    local_network_up()
+    can_ping_all(LOCAL_IPS)
+    can_ping_all(REMOTE_IPS)
+    # local_network_up()
     # can_lookup_domain('google.com', resolver=REMOTE_DNS_IP)
