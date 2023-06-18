@@ -40,7 +40,7 @@ def can_resolve_host(host: str, resolver=REMOTE_DNS_IP) -> bool:
     print(f"Resolving {host} with {resolver}...", end='')
     ip = lookup_host(host, nameserver=resolver)
     if ip:
-        print("[green]ok {ip=}[/]")
+        print(f"[green]ok {ip=}[/]")
         return True
     print("[red]fail[/]")
     return False
@@ -84,7 +84,7 @@ def local_network_up() -> bool:
 
 
 if __name__ == '__main__':
-    can_ping_all(LOCAL_IPS)
-    can_ping_all(REMOTE_IPS)
-    # local_network_up()
+#     can_ping_all(LOCAL_IPS)
+#     can_ping_all(REMOTE_IPS)
+    local_network_up()
     # can_lookup_domain('google.com', resolver=REMOTE_DNS_IP)
