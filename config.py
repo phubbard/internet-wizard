@@ -33,3 +33,6 @@ REMOTE_HOSTS = [
 LOCAL_DOMAIN = 'phfactor.net'
 LOCAL_DNS_IP = '204.128.136.5'
 REMOTE_DNS_IP = '8.8.8.8'
+
+LOCAL_HOSTS = [ x + '.phfactor.net' for x in LOCAL_HOSTS]
+
