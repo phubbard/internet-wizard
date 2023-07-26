@@ -1,6 +1,5 @@
 
 # thinking with code.
-
 LOCAL_IPS = [
     '192.168.100.1',
     '204.128.136.11',
@@ -23,16 +22,15 @@ REMOTE_IPS = [
 ]
 
 REMOTE_DOMAINS = [
-    'google.com', 'cloudflare.com'
+    'google.com', 'cloudflare.com', 'amazon.com'
 ]
 
 REMOTE_HOSTS = [
-    'www.google.com', 'www.cloudflare.com'
+    'www.google.com', 'www.cloudflare.com', 'www.amazon.com'
 ]
 
 LOCAL_DOMAIN = 'phfactor.net'
 LOCAL_DNS_IP = '204.128.136.5'
 REMOTE_DNS_IP = '8.8.8.8'
 
-LOCAL_HOSTS = [ x + '.phfactor.net' for x in LOCAL_HOSTS]
-
+LOCAL_HOSTS_FQDN = [f'{x}.{LOCAL_DOMAIN}' for x in LOCAL_HOSTS]
