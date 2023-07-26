@@ -23,7 +23,8 @@ it should print out success / failure, what it might mean and how to reset / res
 
 The config.py file contains a few lists and constants. I want to test
 
-1. Local ping by IP. Most-basic. DHCP and connectivity.
+1. Do I have an IP? DHCP and working connection.
+1. Local ping by IP. Most-basic. Connectivity.
 2. Local ping by hostname. DNS and domain default working.
 3. Local ping wifi, router and modem - respectively.
 4. TODO - ping next upstream box. Discover via traceroute / TTL cleverness.
