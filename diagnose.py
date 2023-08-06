@@ -4,7 +4,7 @@ from ping3 import ping
 from rich import pretty, print
 
 from config import *
-from dns import lookup_domain, lookup_host, get_interface_ip
+from utils import *
 
 
 # TODO https://rich.readthedocs.io/en/latest/progress.html
@@ -12,70 +12,6 @@ from dns import lookup_domain, lookup_host, get_interface_ip
 
 # See https://pypi.org/project/rich/
 pretty.install()
-
-
-def have_ip_address() -> bool:
-    print("Checking for IP address...", end='')
-    ip = get_interface_ip()
-    if ip:
-        print(f"[green]ok {ip=}[/]")
-        return True
-    print("[red]fail[/]")
-    return False
-
-
-def can_ping(host: str, timeout=2) -> bool:
-    """
-    One single ping, to bastardize the movie quote.
-    """
-    print(f"Pinging {host}...", end='')
-    rc = ping(host, timeout=timeout)
-    if rc:
-        print("[green]up[/]")
-        return True
-    print("[red]down[/]")
-    return False
-
-
-def can_ping_all(hosts: list, timeout=1) -> bool:
-    """
-    Ping all hosts in a list
-    """
-    tf_list = [can_ping(host, timeout=timeout) for host in hosts]
-    return all(tf_list)
-
-
-def can_resolve_host(host: str, resolver=REMOTE_DNS_IP) -> bool:
-    # Try the Julia Evans code - only depends on stdlib
-    print(f"Resolving {host} with {resolver}...", end='')
-    ip = lookup_host(host, nameserver=resolver)
-    if ip:
-        print(f"[green]ok {ip=}[/]")
-        return True
-    print("[red]fail[/]")
-    return False
-
-
-def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
-    tf_list = [can_resolve_host(host, resolver=resolver) for host in hosts]
-    return all(tf_list)
-
-
-def can_lookup_domain(domain: str, resolver: str) -> bool:
-    print(f"Looking up {domain} with {resolver}...", end='')
-    try:
-        lookup_domain(domain)
-        print("[green]ok[/]")
-        return True
-    except:
-        print("[red]fail[/]")
-        return False
-
-
-def colorize(tf: bool) -> str:
-    if tf:
-        return "[green]ok[/]"
-    return "[red]fail[/]"
 
 
 def local_network_up() -> bool:

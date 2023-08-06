@@ -6,6 +6,8 @@ import struct
 import socket
 from typing import List
 
+from ping3 import ping
+
 
 @dataclass
 class DNSHeader:
@@ -47,7 +49,7 @@ CLASS_IN = 1
 TYPE_TXT = 16
 TYPE_NS = 2
 RECURSION_DESIRED = 1 << 8
-
+DNS_DEFAULT_IP = '8.8.8.8'
 
 def header_to_bytes(header):
     fields = dataclasses.astuple(header)
@@ -171,7 +173,7 @@ def resolve(domain_name, record_type=TYPE_A, nameserver='198.41.0.4'):
 
 
 ############################################################
-# Public API calls
+# Public API calls - DNS lookup, host lookup, interface IP #
 def lookup_domain(domain_name):
     query = build_query(domain_name, TYPE_A)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -203,4 +205,68 @@ def get_interface_ip() -> str:
     finally:
         s.close()
     return ip
+
+
+def have_ip_address() -> bool:
+    print("Checking for IP address...", end='')
+    ip = get_interface_ip()
+    if ip:
+        print(f"[green]ok {ip=}[/]")
+        return True
+    print("[red]fail[/]")
+    return False
+
+
+def can_ping(host: str, timeout=2) -> bool:
+    """
+    One single ping, to bastardize the movie quote.
+    """
+    print(f"Pinging {host}...", end='')
+    rc = ping(host, timeout=timeout)
+    if rc:
+        print("[green]up[/]")
+        return True
+    print("[red]down[/]")
+    return False
+
+
+def can_ping_all(hosts: list, timeout=1) -> bool:
+    """
+    Ping all hosts in a list
+    """
+    tf_list = [can_ping(host, timeout=timeout) for host in hosts]
+    return all(tf_list)
+
+
+def can_resolve_host(host: str, resolver=DNS_DEFAULT_IP) -> bool:
+    # Try the Julia Evans code - only depends on stdlib
+    print(f"Resolving {host} with {resolver}...", end='')
+    ip = lookup_host(host, nameserver=resolver)
+    if ip:
+        print(f"[green]ok {ip=}[/]")
+        return True
+    print("[red]fail[/]")
+    return False
+
+
+def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
+    tf_list = [can_resolve_host(host, resolver=resolver) for host in hosts]
+    return all(tf_list)
+
+
+def can_lookup_domain(domain: str, resolver: str) -> bool:
+    print(f"Looking up {domain} with {resolver}...", end='')
+    try:
+        lookup_domain(domain)
+        print("[green]ok[/]")
+        return True
+    except:
+        print("[red]fail[/]")
+        return False
+
+
+def colorize(tf: bool) -> str:
+    if tf:
+        return "[green]ok[/]"
+    return "[red]fail[/]"
 
