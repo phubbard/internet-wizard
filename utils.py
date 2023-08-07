@@ -8,6 +8,8 @@ from typing import List
 
 from ping3 import ping
 
+from rich import pretty, print
+pretty.install()
 
 @dataclass
 class DNSHeader:

@@ -1,5 +1,6 @@
 
 from rich import pretty, print
+pretty.install()
 
 from config_vpn import *
 from utils import *
@@ -8,8 +9,6 @@ from utils import *
 # TODO https://rich.readthedocs.io/en/latest/progress.html
 # TODO https://stackoverflow.com/questions/49320007/how-to-use-tqdm-to-iterate-over-a-list
 
-# See https://pypi.org/project/rich/
-pretty.install()
 
 
 def local_network_up() -> bool:

@@ -1,10 +1,7 @@
-
-# from nslookup import Nslookup
-from ping3 import ping
-from rich import pretty, print
-
 from config import *
 from utils import *
+
+from rich import pretty, print
 
 
 # TODO https://rich.readthedocs.io/en/latest/progress.html
@@ -31,7 +28,4 @@ def local_network_up() -> bool:
 
 
 if __name__ == '__main__':
-    # can_ping_all(LOCAL_IPS)
-    # can_ping_all(REMOTE_IPS)
-    print(f'Summary: {colorize(local_network_up())}')
-    # can_lookup_domain('google.com', resolver=REMOTE_DNS_IP)
+    local_network_up()
