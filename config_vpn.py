@@ -1,13 +1,4 @@
 
-# thinking with code.
-LAN_LOCAL_IPS = [
-    '192.168.100.1',
-    '204.128.136.11',
-    '204.128.136.5',
-    '204.128.136.2'
-]
-
-LAN_LOCAL_HOSTS = ['printer.local', 'nas.local']
 
 REMOTE_IPS = [
     '8.8.8.8',

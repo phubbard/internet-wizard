@@ -13,14 +13,12 @@ from utils import *
 
 def local_network_up() -> bool:
     local_ip = colorize(have_ip_address())
-    local_network = colorize(can_ping_all(LAN_LOCAL_IPS))
-    local_bcast = colorize(can_ping_all(LAN_LOCAL_HOSTS))
 
     remote_network = colorize(can_ping_all(REMOTE_IPS))
     remote_domains = colorize(all(can_lookup_domain(domain, resolver=REMOTE_DNS_IPS[0]) for domain in REMOTE_DOMAINS))
     remote_hosts = colorize(can_resolve_all_hosts(REMOTE_HOSTS, resolver=REMOTE_DNS_IPS[0]))
 
-    print(f'{local_ip=} {local_network=} {local_bcast=} {remote_network=} {remote_domains=} {remote_hosts=}')
+    print(f'{local_ip=} {remote_network=} {remote_domains=} {remote_hosts=}')
 
 if __name__ == '__main__':
     local_network_up()
