@@ -135,9 +135,15 @@ def parse_question(reader):
 def send_query(ip_address, domain_name, record_type):
     query = build_query(domain_name, record_type)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(query, (ip_address, 53))
-    data, _ = sock.recvfrom(1024)
-    return parse_dns_packet(data)
+    try:
+        sock.settimeout(5)  # Add timeout to prevent hanging
+        sock.sendto(query, (ip_address, 53))
+        data, _ = sock.recvfrom(1024)
+        return parse_dns_packet(data)
+    except Exception as e:
+        raise Exception(f"DNS query failed: {str(e)}")
+    finally:
+        sock.close()
 
 
 def get_answer(packet):
@@ -177,19 +183,33 @@ def resolve(domain_name, record_type=TYPE_A, nameserver='198.41.0.4'):
 ############################################################
 # Public API calls - DNS lookup, host lookup, interface IP #
 def lookup_domain(domain_name):
-    query = build_query(domain_name, TYPE_A)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(query, ('8.8.8.8', 53))
-    data, _ = sock.recvfrom(1024)
-    response = parse_dns_packet(data)
-    return ip_to_string(response.answers[0].data)
+    # TODO make resolver a named param w/default to google
+    try:
+        query = build_query(domain_name, TYPE_A)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(5)  # Add timeout to prevent hanging
+        sock.sendto(query, ('8.8.8.8', 53))
+        data, _ = sock.recvfrom(1024)
+        response = parse_dns_packet(data)
+        return ip_to_string(response.answers[0].data)
+    except IndexError:
+        # No answers in response
+        return None
+    except Exception as e:
+        print(f"[red]DNS lookup error: {str(e)}[/]")
+        return None
 
 
 def lookup_host(hostname:str, nameserver='8.8.8.8') -> str:
     # Hardwired - non-recursive, A records only
-    response = send_query(nameserver, hostname, TYPE_A)
-    if ip := get_answer(response):
-        return ip_to_string(ip)
+    try:
+        response = send_query(nameserver, hostname, TYPE_A)
+        if ip := get_answer(response):
+            return ip_to_string(ip)
+        return None
+    except Exception as e:
+        print(f"[red]Host lookup error: {str(e)}[/]")
+        return None
 
 
 def get_interface_ip() -> str:
@@ -224,31 +244,43 @@ def can_ping(host: str, timeout=2) -> bool:
     One single ping, to bastardize the movie quote.
     """
     print(f"Pinging {host}...", end='')
-    rc = ping(host, timeout=timeout)
-    if rc:
-        print("[green]up[/]")
-        return True
-    print("[red]down[/]")
-    return False
+    try:
+        rc = ping(host, timeout=timeout)
+        if rc:
+            print("[green]up[/]")
+            return True
+        print("[red]down[/]")
+        return False
+    except Exception as e:
+        print(f"[red]error: {str(e)}[/]")
+        return False
 
 
 def can_ping_all(hosts: list, timeout=1) -> bool:
     """
     Ping all hosts in a list
     """
-    tf_list = [can_ping(host, timeout=timeout) for host in hosts]
-    return all(tf_list)
+    try:
+        tf_list = [can_ping(host, timeout=timeout) for host in hosts]
+        return all(tf_list)
+    except Exception as e:
+        print(f"[red]Error in ping_all: {str(e)}[/]")
+        return False
 
 
 def can_resolve_host(host: str, resolver=DNS_DEFAULT_IP) -> bool:
     # Try the Julia Evans code - only depends on stdlib
     print(f"Resolving {host} with {resolver}...", end='')
-    ip = lookup_host(host, nameserver=resolver)
-    if ip:
-        print(f"[green]ok {ip=}[/]")
-        return True
-    print("[red]fail[/]")
-    return False
+    try:
+        ip = lookup_host(host, nameserver=resolver)
+        if ip:
+            print(f"[green]ok {ip=}[/]")
+            return True
+        print("[red]fail[/]")
+        return False
+    except Exception as e:
+        print(f"[red]error: {str(e)}[/]")
+        return False
 
 
 def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
@@ -259,11 +291,14 @@ def can_resolve_all_hosts(hosts: list, resolver: str) -> bool:
 def can_lookup_domain(domain: str, resolver: str) -> bool:
     print(f"Looking up {domain} with {resolver}...", end='')
     try:
-        lookup_domain(domain)
-        print("[green]ok[/]")
-        return True
-    except:
-        print("[red]fail[/]")
+        res = lookup_domain(domain)
+        if res:
+            print(f"[green] {res} ok[/]")
+            return True
+        print("[red]fail - no result[/]")
+        return False
+    except Exception as e:
+        print(f"[red]error: {str(e)}[/]")
         return False
 
 
