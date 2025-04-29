@@ -36,12 +36,6 @@ def local_network_up() -> bool:
             router = colorize(False)
             
         try:
-            modem = colorize(can_ping(MODEM))
-        except Exception as e:
-            print(f"[red]Error checking modem: {str(e)}[/]")
-            modem = colorize(False)
-            
-        try:
             wifi = colorize(can_ping(WIFI))
         except Exception as e:
             print(f"[red]Error checking wifi: {str(e)}[/]")
@@ -66,12 +60,12 @@ def local_network_up() -> bool:
             print(f"[red]Error checking remote hosts: {str(e)}[/]")
             remote_hosts = colorize(False)
 
-        print(f'{local_ip=} {local_network=} {local_dns=} {router=} {modem=} {wifi=} {remote_network=} {remote_domains=} {remote_hosts=}')
+        print(f'{local_ip=} {local_network=} {local_dns=} {router=} {wifi=} {remote_network=} {remote_domains=} {remote_hosts=}')
         
         # Evaluate overall network status
         all_checks = [
             "ok" in local_ip, "ok" in local_network, "ok" in local_dns,
-            "ok" in router, "ok" in modem, "ok" in wifi,
+            "ok" in router, "ok" in wifi,
             "ok" in remote_network, "ok" in remote_domains, "ok" in remote_hosts
         ]
         return all(all_checks)
