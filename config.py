@@ -1,18 +1,17 @@
 
 # thinking with code.
 LOCAL_IPS = [
-    '192.168.100.1',
+    '204.128.136.3',
     '204.128.136.11',
     '204.128.136.5',
     '204.128.136.2'
 ]
 
-MODEM = 'modem'
 WIFI = 'wifi'
 ROUTER = 'fratboy'
 
 LOCAL_HOSTS = [
-    'usul', MODEM, WIFI, ROUTER
+    'webserver', 'servlet', WIFI, ROUTER
 ]
 
 REMOTE_IPS = [
